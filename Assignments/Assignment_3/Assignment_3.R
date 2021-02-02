@@ -206,8 +206,32 @@ newdat1 <- dat[c(1:50),c(1:5)]
 newdat2 <- dat[c(101:150),c(1:5)]
 newdat <- rbind(newdat1,newdat2)
 newerdat <- rbind(dat[c(1:50),c(1:5)],dat[c(101:150),c(1:5)])
+# CTRL ALT B -> runs all previous code in order
+
+iris$Species == "setosa"
+3>4
+3==3
+3==2+1
+"A" %in% c("A","B","C")
+c("A","D") %in% c("A","B","C")
+1:10>5
+
+therowsiwant <- iris$Species %in% c("setosa","virginica") 
+iris[therowsiwant,]
+
+iris$Sepal.Length>5
+myrows <- iris$Sepal.Length>=6 
+iris[myrows,]
+dim(iris[myrows,])
+my_iris <- iris[myrows,]
+
+table(my_iris$Species)
+
+#iris[iris$Species != "versicolor",]
+
+
 # 4.  Write code to save this new subset as a .csv file called setosa_and_virginica.csv
-write.csv(newerdat, file= "setosa_and_virginica.csv")
+write.csv(newerdat, file= "./setosa_and_virginica.csv")
 
 # 5.  Upload this R script (with all answers filled in and tasks completed) to canvas and GitHub
       # I should be able to run your R script and get all the plots created and saved, etc.
