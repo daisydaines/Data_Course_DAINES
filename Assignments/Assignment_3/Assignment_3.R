@@ -227,6 +227,11 @@ my_iris <- iris[myrows,]
 
 table(my_iris$Species)
 
+
+new_df <- read.csv("./setosa_and_virginica.csv")
+
+
+
 #iris[iris$Species != "versicolor",]
 
 
