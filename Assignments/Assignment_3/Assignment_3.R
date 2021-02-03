@@ -185,6 +185,33 @@ for(i in levels(dat$Species)){
 }
 
 
+iris$Species == "setosa"
+3>4
+3==3
+3==2+1
+"A" %in% c("A","B","C")
+c("A","D") %in% c("A","B","C")
+1:10>5
+
+iris$Sepal.Length>5
+myrows <- iris$Sepal.Length>=6 
+iris[myrows,]
+dim(iris[myrows,])
+my_iris <- iris[myrows,]
+
+table(my_iris$Species)
+
+
+new_df <- read.csv("./setosa_and_virginica.csv")
+
+
+
+#iris[iris$Species != "versicolor",]
+
+newdat1 <- dat[c(1:50),c(1:5)]
+newdat2 <- dat[c(101:150),c(1:5)]
+newdat <- rbind(newdat1,newdat2)
+newerdat <- rbind(dat[c(1:50),c(1:5)],dat[c(101:150),c(1:5)])
 
 # YOUR REMAINING HOMEWORK ASSIGNMENT (Fill in with code) ####
 
@@ -202,38 +229,10 @@ plot(x=dat$Sepal.Length,
 dev.off()
 
 # 3.  Subset the Iris data set to only include rows from the setosa and virginica Species
-newdat1 <- dat[c(1:50),c(1:5)]
-newdat2 <- dat[c(101:150),c(1:5)]
-newdat <- rbind(newdat1,newdat2)
-newerdat <- rbind(dat[c(1:50),c(1:5)],dat[c(101:150),c(1:5)])
 # CTRL ALT B -> runs all previous code in order
-
-iris$Species == "setosa"
-3>4
-3==3
-3==2+1
-"A" %in% c("A","B","C")
-c("A","D") %in% c("A","B","C")
-1:10>5
 
 therowsiwant <- iris$Species %in% c("setosa","virginica") 
 iris[therowsiwant,]
-
-iris$Sepal.Length>5
-myrows <- iris$Sepal.Length>=6 
-iris[myrows,]
-dim(iris[myrows,])
-my_iris <- iris[myrows,]
-
-table(my_iris$Species)
-
-
-new_df <- read.csv("./setosa_and_virginica.csv")
-
-
-
-#iris[iris$Species != "versicolor",]
-
 
 # 4.  Write code to save this new subset as a .csv file called setosa_and_virginica.csv
 write.csv(newerdat, file= "./setosa_and_virginica.csv")
