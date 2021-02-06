@@ -1,0 +1,7 @@
+1. read.csv handles rows of unequal length by implicitly adding blank fields. 
+2. read.csv2 separates the values by semicolons and commas, whereas read.csv separates values by commas and decimals. 
+3. read.csv2() would be used in countries where commas are used instead of decimals. 
+4. df <- read.csv("../../Data/landdata-states.csv", stringsAsFactors = TRUE)
+5. summary(df$Home.Value)
+6. [1] "Home.Value"
+7. You are adding color coding to each of the different regions 
