@@ -1,0 +1,6 @@
+===================================================
+== Maximum Horsepower                            ==
+===================================================
+mtcars data set:                             :  335 
+mtcars (automatic transmission only) data set:  245 
+mtcars (<= 200 cu in displacement) data set  :  175 

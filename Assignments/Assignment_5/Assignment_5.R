@@ -7,9 +7,9 @@ library(carData)
 library(RColorBrewer)
 library(colorblindr)
 
-
 # Load the first data set we will work with (built-in to ggplot)
 data("midwest", package = "ggplot2")
+midwest
 
 # Intro to ggplot syntax
 
@@ -48,7 +48,7 @@ ggplot(midwest, aes(x=area, y=poptotal)) + geom_point() # The "+" tells ggplot t
 # Add another geom ... a trendline:
 ggplot(midwest, aes(x=area, y=poptotal)) + geom_point() + geom_smooth(method = "lm")
 # The line of best fit is in blue. Can you find out what other method options are available for geom_smooth? 
-
+?geom_smooth
 # Store your plot as an object to add to...
 p <- ggplot(midwest, aes(x=area, y=poptotal)) + geom_point() + geom_smooth(method = "lm")
 
@@ -94,14 +94,17 @@ p3 <- ggplot(midwest, aes(x=area, y=poptotal)) +
   labs(title="Area Vs Population", subtitle="From midwest dataset", y="Population", x="Area", caption="Midwest Demographics")
 p3
 
+?geom_smooth(method)
 # Don't like those colors?
 p3 + scale_color_brewer(palette = "Set1")
+
+p3 + scale_color_viridis_d()
 
 # Want more color choices? You can check them out in the RColorBrewer package, or even make your own
 brewer.pal.info
 
 # Make your own and take a peek at it:
-pal = c("#c4a113","#c1593c","#643d91","#820616","#477887","#688e52",
+pal <-  c("#c4a113","#c1593c","#643d91","#820616","#477887","#688e52",
         "#12aa91","#705f36","#8997b2","#753c2b","#3c3e44","#b3bf2d",
         "#82b2a4","#894e7d","#a17fc1","#262a8e","#abb5b5","#000000")
 palette_plot(pal)
@@ -115,7 +118,7 @@ p3 + scale_color_manual(values=pal)
 p3 + scale_x_reverse()
 p3 + theme_minimal()
 p3 + theme_dark()
-
+p3 + theme_bw()
 
 # You can also transform your data right in ggplot:
 p4 = ggplot(midwest, aes(x=area/max(midwest$area), y=log10(poptotal))) + 
@@ -137,7 +140,6 @@ p4 + facet_wrap(~ state) + theme(legend.position = "none",
                                  strip.text.x = element_text(size = 12, face="bold"),
                                  strip.background = element_rect(fill = "lightblue"))
 
-
 # Some other "geom" types ... for categorical x axis
 p5 = ggplot(midwest, aes(x=state,y=percollege, fill=state)) + labs(x="State",y="Percent with college degree")
 p5
@@ -145,7 +147,6 @@ p5
 p5 + geom_boxplot()
 p5 + geom_violin()
 p5 + geom_bar(stat="identity") # something wrong with this picture!
-
 
 # Geoms for looking at a single variable's distribution:
 data("MplsStops")
@@ -173,6 +174,9 @@ ggplot(MplsStops, aes(x=lat,y=long)) + geom_bin2d() + facet_wrap(~race)
 
 
 
+
+ggplot(iris, aes(x=Sepal.Length - mean(Sepal.Length),color=Species)) +
+  geom_bar()
 
 # More advanced understanding of R functions will be required to replicate the following section, but it
 # is included as an example follow-up analysis
@@ -216,7 +220,6 @@ ggplot(random_data, aes(x=x, y=y) ) +
 ggplot(random_data, aes(x=x, y=y) ) +
   geom_bin2d() +
   theme_bw()
-
 
 
 
