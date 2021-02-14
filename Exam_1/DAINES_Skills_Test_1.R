@@ -1,6 +1,6 @@
 #Daines Exam 1
 library(tidyverse)
-DNA_Conc_by_Extraction_Date
+read.csv("DNA_Conc_by_Extraction_Date.csv")
 df <- DNA_Conc_by_Extraction_Date
 #1
 pBen <- ggplot(df, aes(x= DNA_Concentration_Ben, y=)) +
