@@ -1,0 +1,122 @@
+---
+title: "DAINES_Assignment_9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(productplots)
+```
+
+The data set "/Data/GradSchool_Admissions.csv" contains predictors of graduate
+school admission.
+
+Here's a summary of the raw data (after converting admit and rank to factors):
+
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+df <- read.csv("./../Data/GradSchool_Admissions.csv")
+df$admit <- as.factor(df$admit)
+df$rank <- as.factor(df$rank)
+summary(df)
+```
+
+## Observations from data set
++ 400 records
+  - 127 admitted to graduate school (admit=1)
+  - 273 not admitted (admit=0)
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+xtabs(~admit + rank, data = df)
+prodplot(df, ~ admit + rank) + aes(fill=admit)
+```
+
+#### Under-grad Rank appears to influence admittance to grad program
++ Let's examine undergrad GPA and GRE scores
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=8, fig.height=4}
+ggplot(df,aes(x=gpa, y=gre, color=admit)) +
+  geom_point() +
+  facet_grid(~ rank) +
+#  theme_minimal() +
+  ggtitle("Grad School Admissions by rank of undergrad, showing GPA and GRE") +
+  xlab("GPA") +
+  ylab("GRE")
+```
+
+#### Observations from plotting by rank of undergrad institution, by GPA, by GRE
++ Rank appears to influence decision even for students with comparable GPA and GRE scores 
+
+
+### Let's focus on well qualified students for a second
++ For our purposes, we'll define "well qualified" as those with GPA >= 3.5 and a GRE score >= 600
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=8, fig.height=4}
+
+df %>% 
+  filter(gpa >= 3.5) %>%
+  filter(gre >= 600) %>%
+  ggplot(aes(x=gpa, y=gre, color=admit)) +
+  geom_point() +
+  facet_grid(~ rank) +
+#  theme_minimal() +
+  ggtitle("Grad School Admissions by rank of undergrad, showing GPA >= 3.5 and GRE >= 600") +
+  xlab("GPA") +
+  ylab("GRE")
+```
+Notice, for instance, that even perfect GRE score students from lower-tier schools have a hard time being admitted to grad school.
+
+Whereas, all but one perfect score GRE student from the top-tier programs were admitted.
+
+## Undergrad institution rank seems to have biggest impact on acceptance to grad school
+
+Let's explore models...
+
+## Build models
+
+Let's create a generalized linear model to determine which factors impact the 
+likelihood of acceptance to grad school. Our factors from this data set include:
++ GPA
++ GRE test scores
++ undergrad program rank
+
+### Hypothesis: undergrad rank is most significant.
++ Let's see if the model proves this!
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+mod1 <- glm(data= df, 
+            formula = admit ~ gre + gpa + rank,
+            family = "binomial")
+summary(mod1)
+```
+From this summary we see that Rank significantly impacts admittance to graduate school, especially for students from rank 3 and 4 schools. 
+
+
+UCLA's Institute for Digital Research & Education Statistical Consulting analyzed the same [data.](https://stats.idre.ucla.edu/r/dae/logit-regression/){target="_blank"} You can also use predicted probabilities to help you understand the model. Predicted probabilities can be computed for both categorical and continuous predictor variables. In order to create predicted probabilities we first need to create a new data frame with the values we want the independent variables to take on to create our predictions.
+
+We will start by calculating the predicted probability of admission at each value of rank, holding gre and gpa at their means. First we create and view the data frame.
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+newdata1 <- with(df, data.frame(gre = mean(gre), gpa = mean(gpa), rank = factor(1:4)))
+
+newdata1
+```
+```{r, message=FALSE,warning=FALSE,echo=FALSE}
+newdata1$rankP <- predict(mod1, newdata = newdata1, type = "response")
+newdata1
+```
+In the above output we see that the predicted probability of being accepted into a graduate program is 0.52 for students from the highest prestige undergraduate institutions (rank=1), and 0.18 for students from the lowest ranked institutions (rank=4), holding gre and gpa at their means.
+
+## Conclusions
++ Our initial data exploration showed a likelihood that rank was the significant factor.
+  - We plotted admittance by rank for all students
+  - We also plotted admittance by rank for "well-qualified" students
+  
++ In addition, using the generalized model derived from the data set, made predictions based on (4) students, with mean GPA, and mean GRE, but varied the rank.
+
+
+### Overall conclusion
++ Rank plays the most significant factor in determining a student's admittance chance to grad school.
+
