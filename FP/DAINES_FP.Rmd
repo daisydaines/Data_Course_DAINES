@@ -1,0 +1,452 @@
+---
+title: "MoneyBball"
+author: "Daines"
+date: "4/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+```
+
+This project is inspired by Moneyball: The Art of Winning an Unfair Game, a book by Michael Lewis, published in 2003, about the Oakland Athletics baseball team and its general manager Billy Beane. Its focus is the team's analytical, evidence-based, sabermetric approach to assembling a competitive baseball team despite Oakland's small budget. 
+(Source: https://en.wikipedia.org/wiki/Moneyball)
+
+### Can this be replicated in basketball?
+Could data analytics be applied to NBA player statistics to assemble a competitive team on a small budget?
+
+### Data Sources
++ NBA Salaries - USA Today Sports -  https://hoopshype.com/salaries/
++ NBA Team Salaries - USA Today Sports -  https://hoopshype.com/salaries/
++ NBA Players Statistics - NBA.com - https://www.nba.com/stats/players
+
+```{r, echo=FALSE}
+
+# Data Sources:
+# 1) Salary Data
+#    USA Today Sports
+#    https://hoopshype.com/salaries/
+#
+# 2) Statistics Data
+#    NBA.com
+#    https://www.nba.com/stats/players
+#
+#
+# Glossary: (Traditional Stats)
+# -------------------------------------------------------
+# GP Games Played 
+# W Wins 
+# L Losses 
+# MIN Minutes Played 
+# FGM Field Goals Made 
+# FGA Field Goals Attempted 
+# FG% Field Goal Percentage 
+# 3PM 3 Point Field Goals Made 
+# 3PA 3 Point Field Goals Attempted 
+# 3P% 3 Point Field Goals Percentage 
+# FTM Free Throws Made 
+# FTA Free Throws Attempted 
+# FT% Free Throw Percentage 
+# OREB Offensive Rebounds 
+# DREB Defensive Rebounds 
+# REB Rebounds 
+# AST Assists 
+# TOV Turnovers 
+# STL Steals 
+# BLK Blocks 
+# PF Personal Fouls 
+# FP Fantasy Points 
+# DD2 Double doubles 
+# TD3 Triple doubles 
+# PTS Points 
+# +/- Plus Minus
+#
+# Glossary: (Advanced)
+# -------------------------------------------------------
+# GP Games Played 
+# W Wins 
+# L Losses 
+# MIN Minutes Played 
+# OffRtg Offensive Rating 
+# DefRtg Defensive Rating 
+# NetRtg Net Rating 
+# AST% Assist Percentage 
+# AST/TO Assist to Turnover Ratio 
+# AST Ratio Assist Ratio 
+# OREB% Offensive Rebound Percentage 
+# DREB% Defensive Rebound Percentage 
+# REB% Rebound Percentage 
+# TO Ratio Turnover Ratio 
+# eFG% Effective Field Goal Percentage 
+# TS% True Shooting Percentage 
+# USG% Usage Percentage 
+# PACE Pace 
+# PIE Player Impact Estimate
+#
+# Glossary: (Misc)
+# -------------------------------------------------------
+# GP Games Played 
+# W Wins 
+# L Losses 
+# MIN Minutes Played 
+# PTS OFF TO Points Off Turnovers 
+# 2nd PTS Second Chance Points 
+# FBPs Fast Break Points 
+# PITP Points in the Paint Opp 
+# PTS OFF TO Opponent Points Off Turnovers 
+# Opp 2nd PTS Opponent 2nd Chance Points 
+# Opp FBPs Opponent Fast Break Points 
+# Opp PITP Opponent Points in the Paint 
+# BLK Blocks 
+# BLKA Blocked Field Goal Attempts 
+# PF Personal Fouls 
+# PFD Personal Fouls Drawn
+#
+# Glossary: (Scoring)
+# -------------------------------------------------------
+# GP Games Played 
+# W Wins 
+# L Losses 
+# MIN Minutes Played 
+# %FGA 2PT Percent of Field Goals Attempted (2 Pointers) 
+# %FGA 3PT Percent of Field Goals Attempted (3 Pointers) 
+# %PTS 2PT Percent of Points (2 Pointers) 
+# %PTS 2PT MR Percent of Points (Mid-Range) 
+# %PTS 3PT Percent of Points (3 Pointers) 
+# %PTS FBPs Percent of Points (Fast Break Points) 
+# %PTS FT Percent of Points (Free Throws) 
+# %PTS OffTO Percent of Points (Off Turnovers) 
+# %PTS PITP Percent of Points (Points in the Paint) 
+# 2FGM %AST Percent of 2 Point Field Goals Made Assisted 
+# 2FGM %UAST Percent of 2 Point Field Goals Made Unassisted 
+# 3FGM %AST Percent of 3 Point Field Goals Made Assisted 
+# 3FGM %UAST Percent of 3 Point Field Goals Made Unassisted 
+# FGM %AST Percent of Point Field Goals Made Assisted 
+# FGM %UAST Percent of Point Field Goals Made Unassisted
+#
+# Glossary: (Defense)
+# -------------------------------------------------------
+# GP Games Played 
+# W Wins 
+# L Losses 
+# MIN Minutes Played 
+# DEF RTG Defensive Rating 
+# DREB Defensive Rebounds 
+# DREB% Defensive Rebound Percentage 
+# % DREB Percent of Team's Defensive Rebounds 
+# STL Steals 
+# STL% Percent of Team's Steals 
+# BLK Blocks 
+# %BLK Percent of Team's Blocks 
+# OPP PTS OFF TOV Opponent Points Off Turnovers 
+# OPP PTS 2ND CHANCE Opponent 2nd Chance Points 
+# OPP PTS FB Opponent Fast Break Points 
+# OPP PTS PAINT Opponent Points in the Paint 
+# DEF WS Defensive Win Shares
+#
+# Glossary: (Estimated Advanced)
+# -------------------------------------------------------
+# GP Games Played 
+# W Wins 
+# L Losses 
+# MIN Minutes Played 
+# Est. OffRtg Estimated Offensive Rating 
+# Est. DefRtg Estimated Defensive Rating 
+# Est. NetRtg Estimated Net Rating 
+# Est. AST Ratio Estimated Assist Ratio 
+# Est. OREB% Estimated Offensive Rebound Percentage 
+# Est. DREB% Estimated Defensive Rebound Percentage 
+# Est. REB% Estimated Rebound Percentage 
+# Est. TO Ratio Estimated Turnover Ratio 
+# Est. USG% Estimated Usage Percentage 
+# Est. PACE Estimated Pace
+
+```
+
+### Loading Salary Data
+
+#### Cleaning Data
+
++ Load from csv file
++ Remove unneeded columns
++ Rename columns
++ Remove header row from source data
++ Convert salary ($,) from chr to numeric
++ Sort by player name (to later combine with statistics)
+
+```{r, echo=FALSE}
+# Load NBA player salary data
+ps <- read.csv("nba-salaries.csv")
+
+#dim(ps)
+#str(ps)
+#colnames(ps)
+
+# select only the columns we need: Player name and 20/21 salary
+ps2 <- ps %>% dplyr::select(2:3) 
+
+#head(ps2)
+#colnames(ps2)
+
+# change column names from defaults
+ps2 <- ps2 %>%
+  dplyr::rename(Player = Column.2,
+                Salary.20.21 = Column.3
+              )
+
+#colnames(ps2)
+# remove header row
+ps2 <- ps2[-c(1),]
+#head(sal_df2)
+
+# convert salary from chr with $ and ,'s to numeric
+ps2$Salary.20.21 <- as.numeric(gsub('[$,]', '', ps2$Salary.20.21))
+
+# sort by player name
+ps2 <- ps2 %>%
+  arrange(Player)
+
+#head(ps2)
+```
+
+Here is a boxplot of player salaries:
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=2, fig.height=3}
+
+ggplot(ps2, aes(y=Salary.20.21/1000000)) +
+  geom_boxplot() +
+  theme_minimal() +
+  ylab("Player Salaries ($M)")
+
+```
+
+```{r, echo=FALSE}
+#-------------------------------------------------------
+# Load NBA team salary data
+ts <- read.csv("nba-team-salaries.csv")
+
+#dim(ts)
+#str(ts)
+#colnames(ts)
+#head(ts)
+
+# select only the columns we need: Player name and 20/21 salary
+ts2 <- ts %>% dplyr::select(2:3) 
+
+#head(ts2)
+#colnames(ts2)
+
+# change column names from defaults
+ts2 <- ts2 %>%
+  dplyr::rename(Team.Name = Column.2,
+                Salary.20.21 = Column.3
+              )
+
+# convert salary from chr with $ and ,'s to numeric
+ts2$Salary.20.21 <- as.numeric(gsub('[$,]', '', ts2$Salary.20.21))
+
+# sort by team name
+ts2 <- ts2 %>%
+  arrange(Team.Name)
+
+#head(ts2)
+
+#-------------------------------------------------------
+# Load NBA team record data
+tr <- read.csv("nba-team-record.csv")
+
+#dim(tr)
+#str(tr)
+#colnames(tr)
+#head(tr)
+
+# select only the columns we need: Player name and 20/21 salary
+tr2 <- tr %>% dplyr::select(1:3) 
+
+#head(tr2)
+#colnames(tr2)
+
+
+# change column names from defaults
+tr2 <- tr2 %>%
+  dplyr::rename(Team.Name = Column.1,
+                Win = Column.2,
+                Loss = Column.3
+              )
+tr2 <- tr2 %>% 
+# remove conference standing digit(s) from name
+  mutate(Team.Name = as.character(gsub("^\\d*","",Team.Name))) %>%
+# remove team name
+  mutate(Team.Name = as.character(gsub(" .*","",Team.Name)))
+
+# sort by city
+tr2 <- tr2 %>%
+  arrange(Team.Name)
+
+tr2$Salary <- ts2$Salary.20.21[match(tr2$Team.Name, ts2$Team.Name)]
+#head(tr2)
+
+```
+
+This shows boxplot of team salaries:
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=2, fig.height=3}
+
+ggplot(ts2, aes(y=Salary.20.21/1000000)) +
+  geom_boxplot(aes()) +
+  theme_minimal() +
+  ylab("20-21 NBA Team Salaries ($M)")
+  
+```
+
+As depicted in boxplot, the salaries are grouped around $130M. Yet, for approximately the same team salary there is a wide range of wins (from <15 to >40)!
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+ggplot(tr2, aes(x=Win, y=Salary/1000000)) +
+  geom_point(aes(size=Salary/1000000, color=Salary/1000000), show.legend=FALSE) +
+  theme_minimal() +
+  xlab("Wins") +
+  ylab("20-21 NBA Team Salaries ($M)")
+  
+```
+
+### Loading Player Statistics Data
+
+#### Player Statistics Data
+
+```{r, echo=FALSE}
+# Load NBA player statistics data
+st1_df <- read.csv("NBA-player-stats-traditional.csv")
+
+# sort by player name
+st1_df2 <- st1_df %>%
+  arrange(Player)
+
+colnames(st1_df2)[30] <- "P.M"
+
+```
+
+```{r, echo=FALSE}
+# Load NBA player statistics - advanced - data
+st2_df <- read.csv("nba-stats-advanced.csv")
+#head(st2_df)
+
+# select only the columns we need: Player name and 20/21 salary
+st2_df2 <- st2_df %>% dplyr::select(2:24) 
+#head(st2_df2)
+
+# change column names from defaults
+st2_df2 <- st2_df2 %>%
+  dplyr::rename(Player = Column.2,
+                Adv.Team = Column.3,
+                Adv.Age = Column.4,
+                Adv.GP = Column.5,
+                Adv.W = Column.6,
+                Adv.L = Column.7,
+                Adv.Min = Column.8,
+                Adv.OffRtg = Column.9,
+                Adv.DefRtg = Column.10,
+                Adv.NetRtg = Column.11,
+                Adv.Ast.P = Column.12,
+                Adv.Ast.TO = Column.13,
+                Adv.AstR = Column.14,
+                Adv.OReb.P = Column.15,
+                Adv.DReb.P = Column.16,
+                Adv.Reb.P = Column.17,
+                Adv.TOR = Column.18,
+                Adv.EFG.P = Column.19,
+                Adv.TS.P = Column.20,
+                Adv.USG.P = Column.21,
+                Adv.Pace = Column.22,
+                Adv.PIE = Column.23,
+                Adv.Poss = Column.24
+              )
+
+st2_df2 <- st2_df2 %>%
+  dplyr::select(!(Adv.Team:Adv.Min))
+
+st3_df1 <- dplyr::inner_join(st1_df2, st2_df2, by="Player")
+st3_df2 <- dplyr::inner_join(st3_df1, ps2, by="Player")
+
+paste0(ncol(st3_df2)-1," Statistics for ",nrow(st3_df1)," Players have been loaded.")
+
+#head(st3_df2)
+```
+
+#### Analyzing Net Rating vs. Salary
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+ggplot(st3_df2, aes(x=Adv.NetRtg, y=Salary.20.21/1000000)) +
+  geom_point(aes(), show.legend=FALSE) +
+  theme_minimal() +
+  xlab("Net Rating") +
+  ylab("Salary ($M)")
+  
+```
+
+
+#### Analyzing +/- vs. Salary
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+ggplot(st3_df2, aes(x=P.M, y=Salary.20.21/1000000)) +
+  geom_point(aes(color=factor(MIN), size=factor(MIN), alpha = 0.5), 
+             show.legend = FALSE) +
+  theme_minimal() +
+  scale_color_hue(direction = -1) +
+  xlab("Plus/Minus") +
+  ylab("Salary ($M)")
+  
+```
+
+#### Let's filter out players
++ With few minutes (we need players!)
++ And Plus/Minus rating < 4 (we need good players)
++ With salaries over $20M (we need affordable players)
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+st3_df3 <- st3_df2 %>% 
+  filter(MIN > 20) %>%
+  filter(P.M > 4) %>%
+  filter(Salary.20.21 < 15000000)
+
+paste0("Now we have ",nrow(st3_df3)," players to analyze.")
+
+ggplot(st3_df3, aes(x=P.M, y=Salary.20.21/1000000)) +
+  geom_point(aes(color=factor(MIN), size=factor(MIN), alpha = 0.5), 
+             show.legend = FALSE) +
+  theme_minimal() +
+  scale_color_hue(direction = -1) +
+  xlab("Plus/Minus") +
+  ylab("Salary ($M)")
+  
+```
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+
+st4_df1 <- as.data.frame(cbind(st3_df3$Player, 
+                            st3_df3$P.M, 
+                            st3_df3$Salary))
+
+colnames(st4_df1) <- c("Player", "P.M", "Salary")
+
+st4_df1$Salary <- as.numeric(st4_df1$Salary)
+
+st4_df1 <- st4_df1 %>%
+  arrange(order(Salary))
+
+
+st4_df1
+
+new_salary <- sum(st4_df1$Salary)
+new_salary
+
+```
+
+
