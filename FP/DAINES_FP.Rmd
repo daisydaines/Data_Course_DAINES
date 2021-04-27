@@ -1,17 +1,16 @@
 ---
-title: "MoneyBball"
+title: "MoneyBball2"
 author: "Daines"
-date: "4/24/2021"
+date: "4/26/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
-library(plotly)
 library(dplyr)
 library(tidyverse)
-library(DT)
+library(stringr)
 ```
 
 This project is inspired by Moneyball: The Art of Winning an Unfair Game, a book by Michael Lewis, published in 2003, about the Oakland Athletics baseball team and its general manager Billy Beane. Its focus is the team's analytical, evidence-based, sabermetric approach to assembling a competitive baseball team despite Oakland's small budget. 
@@ -24,6 +23,8 @@ Could data analytics be applied to NBA player statistics to assemble a competiti
 + NBA Salaries - USA Today Sports -  https://hoopshype.com/salaries/
 + NBA Team Salaries - USA Today Sports -  https://hoopshype.com/salaries/
 + NBA Players Statistics - NBA.com - https://www.nba.com/stats/players
++ NBA Player Statistics - ESPN.com - http://www.espn.com/nba/statistics/rpm
+
 
 ```{r, echo=FALSE}
 
@@ -225,14 +226,6 @@ ggplot(ps2, aes(y=Salary.20.21/1000000)) +
 
 ```
 
-Search for your favorite NBA player to see how much money they are being paid per yer. Some of these might surprise you. 
-
-```{r, echo=FALSE, message=FALSE, fig.align='center', fig.width=2, fig.height=3 }
-datatable(ps2, rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T) )
-```
-
-
-
 ```{r, echo=FALSE}
 #-------------------------------------------------------
 # Load NBA team salary data
@@ -316,7 +309,7 @@ As depicted in boxplot, the salaries are grouped around $130M. Yet, for approxim
 
 ```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
 
-ggplot(tr2, mapping = aes(x=Win, y=Salary/1000000)) +
+ggplot(tr2, aes(x=Win, y=Salary/1000000)) +
   geom_point(aes(size=Salary/1000000, color=Salary/1000000), show.legend=FALSE) +
   theme_minimal() +
   xlab("Wins") +
@@ -460,3 +453,175 @@ new_salary
 ```
 
 
+
+## Let's load ESPN.com NBA stats
+
+```{r, echo=FALSE}
+
+# ESPN NBA data
+#
+# GP:   Games Played
+#
+# MPG:  Minutes Per Game
+#
+# ORPM: Player's estimated on-court impact on team offensive performance, 
+#       measured in points scored per 100 offensive possessions
+#
+# DRPM: Player's estimated on-court impact on team defensive performance, 
+#       measured in points allowed per 100 defensive possessions
+#
+# RPM:  Player's estimated on-court impact on team performance, measured in net point 
+#       differential per 100 offensive and defensive possessions. 
+#       RPM takes into account teammates, opponents and additional factors
+#
+# WINS: "RPM Wins" provide an estimate of the number of wins each player has contributed 
+#       to his team's win total on the season. RPM Wins include the player's 
+#       Real Plus-Minus and his number of possessions played.
+
+# Load ESPN NBA player salary data
+# dfe = Data Frame Espn
+dfe <- read.csv("nba-player-rpm.csv")
+
+#dim(dfe)
+#str(dfe)
+#colnames(dfe)
+#head(dfe,10)
+
+# select only the columns we need
+dfe <- dfe %>% dplyr::select(1:9) 
+
+# change column names from defaults
+dfe <- dfe %>%
+  dplyr::rename(RK = Column.1,
+                PlayerPos = Column.2,
+                Team = Column.3,
+                GP = Column.4,
+                MPG = Column.5,
+                ORPM = Column.6,
+                DRPM = Column.7,
+                RPM = Column.8,
+                WINS = Column.9
+              )
+
+# change Rank (RK) column to numeric
+# Note: will result in NA for unneeded header rows
+dfe$RK <- as.numeric(dfe$RK)
+
+# remove rows with NA's (unneeded header rows)
+dfe <- dfe[complete.cases(dfe), ]
+
+# take position {PG, SG, SF, PF, C} from PlayerPos and make a new column called Pos
+dfe$Pos <- str_split_fixed(dfe$PlayerPos, ",", 2)[,2]
+
+# rename PlayerPos as Player
+dfe <- dfe %>%
+  dplyr::rename(Player = PlayerPos,
+                )
+
+# Remove ", PG, SG, SF, PF, C}" from Player
+dfe$Player <- gsub("(.*),.*", "\\1", dfe$Player)
+
+dfe$MPG <- as.numeric(as.character(dfe$MPG))
+dfe$ORPM <- as.numeric(as.character(dfe$ORPM))
+dfe$DRPM <- as.numeric(as.character(dfe$DRPM))
+dfe$RPM <- as.numeric(as.character(dfe$RPM))
+dfe$WINS <- as.numeric(as.character(dfe$WINS))
+
+
+# make one big data frame
+new_df <- dplyr::inner_join(ps2, dfe, by="Player")
+
+
+dim(dfe)
+dim(ps2)
+dim(new_df)
+colnames(new_df)
+head(new_df)
+
+# sort by player name
+ps2 <- ps2 %>%
+  arrange(Player)
+
+paste0(ncol(new_df)-1," Statistics for ",nrow(new_df)," Players have been loaded.")
+
+
+
+#head(ps2)
+```
+
+
+#### Analyzing Real Plus/Minus vs. Salary
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+ggplot(new_df, aes(x=RPM, y=Salary.20.21/1000000)) +
+  geom_point(aes(), show.legend=FALSE) +
+  theme_minimal() +
+  xlab("Real Plus/Minus") +
+  ylab("Salary ($M)")
+  
+```
+
+
+#### Analyzing WINS vs. Salary
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+ggplot(new_df, aes(x=WINS, y=Salary.20.21/1000000)) +
+  geom_point(aes(), show.legend=FALSE) +
+  theme_minimal() +
+  xlab("WINS") +
+  ylab("Salary ($M)")
+  
+```
+
+
+#### Let's filter out players
++ With few minutes (we need players!)
++ And WINS rating < 5 (we need players who have contributed to the team's wins!)
++ With salaries over $15M (we need affordable players)
+
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+new_df2 <- new_df %>% 
+  filter(MPG > 10) %>%
+  filter(WINS > 5) %>%
+  filter(Salary.20.21 < 10000000)
+
+paste0("Now we have ",nrow(new_df2)," players to analyze.")
+
+ggplot(new_df2, aes(x=WINS, y=Salary.20.21/1000000)) +
+  geom_point(aes(color=factor(MPG), size=factor(MPG), alpha = 0.5), 
+             show.legend = FALSE) +
+  theme_minimal() +
+  scale_color_hue(direction = -1) +
+  xlab("WINS") +
+  ylab("Salary ($M)")
+  
+```
+```{r, message=FALSE,warning=FALSE,echo=FALSE,fig.align='center', fig.width=6, fig.height=4}
+
+new_df3 <- as.data.frame(cbind(new_df2$Player,
+                               new_df2$Pos,
+                               new_df2$GP, 
+                               new_df2$MPG, 
+                               new_df2$WINS, 
+                               new_df2$Salary))
+colnames(new_df3) <- c("Player", "Pos", "GP", "MPG", "WINS", "Salary")
+
+str(new_df3)
+
+new_df3$GP <- as.numeric(as.character(new_df3$GP))
+new_df3$MPG <- as.numeric(as.character(new_df3$MPG))
+new_df3$WINS <- as.numeric(as.character(new_df3$WINS))
+new_df3$Salary <- as.numeric(as.character(new_df3$Salary))
+
+new_df3 <- new_df3 %>%
+  arrange(order(desc(Salary)))
+
+new_df3
+
+new_salary <- sum(new_df3$Salary)
+new_salary
+
+```

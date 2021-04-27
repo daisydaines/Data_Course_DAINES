@@ -15,15 +15,15 @@ library(DT)
 ```
 
 This project is inspired by Moneyball: The Art of Winning an Unfair Game, a book by Michael Lewis, published in 2003, about the Oakland Athletics baseball team and its general manager Billy Beane. Its focus is the team's analytical, evidence-based, sabermetric approach to assembling a competitive baseball team despite Oakland's small budget. 
-(Source: https://en.wikipedia.org/wiki/Moneyball)
+([Source](https://en.wikipedia.org/wiki/Moneyball))
 
 ### Can this be replicated in basketball?
 Could data analytics be applied to NBA player statistics to assemble a competitive team on a small budget?
 
 ### Data Sources
-+ NBA Salaries - USA Today Sports -  https://hoopshype.com/salaries/
-+ NBA Team Salaries - USA Today Sports -  https://hoopshype.com/salaries/
-+ NBA Players Statistics - NBA.com - https://www.nba.com/stats/players
++ [NBA Salaries](https://hoopshype.com/salaries/) - USA Today Sports 
++ [NBA Team Salaries](https://hoopshype.com/salaries/) - USA Today Sports  
++ [NBA Players Statistics](https://www.nba.com/stats/players) - NBA.com 
 
 ```{r, echo=FALSE}
 
