@@ -23,16 +23,14 @@ fs <- read_csv("./FacultySalaries_1995.csv")
 ```
 
 ```{r, echo=FALSE, warning=FALSE}
-glimpse(fs)
+head(fs)
 
 ```
 
 
-Looks a little messy. In order to replicate Fig1.png we will need to clean the data. 
-```{r, echo=FALSE, warning=FALSE}
+Looks a little messy. In order to replicate Fig1
+ we will need to clean the data. 
 
-
-```
 
 ```{r, echo=FALSE, warning=FALSE, include=FALSE}
 names(fs)
@@ -65,7 +63,7 @@ dev.off()
 
 
 ```{r, echo=FALSE, warning=FALSE}
-glimpse(fs4)
+head(fs4)
 ```
 
 ahhh, much better. 
@@ -73,6 +71,14 @@ ahhh, much better.
 ___ 
 
 Next, we will remake Fig1
+
+<center>
+![Fig1](Fig1.png)
+</center>
+
+***
+
+##### Our remake
 
 ```{r, echo=FALSE, warning=FALSE}
 ggplot(fs4, aes(y=Salary,x= Rank)) +
@@ -82,6 +88,9 @@ ggplot(fs4, aes(y=Salary,x= Rank)) +
   theme(axis.text.x = element_text(angle = 55))
 ```
 
+Not too shabby 
+
+___
 
 ### II. Our next task is to Export an ANOVA table to a file called "Salary_ANOVA_Summary.txt"
 The ANOVA model should test the influence of "State", "Tier", and "Rank" on "Salary" but should NOT include any interactions between those predictors.
@@ -119,11 +128,16 @@ jo <- read_csv("./Juniper_Oils.csv")
 
 
 ```{r, warning=FALSE, echo=FALSE}
-glimpse(jo)
+jo
 
 ```
 
 Well, it's time to tidy it up so we can reproduce Fig2. 
+
+
+<center>
+![Fig2](Fig2.png)
+</center>
 
 ```{r, warning=FALSE, echo=FALSE, include=FALSE}
 jo1 <- jo %>% 
@@ -141,6 +155,10 @@ jo2 <- jo1 %>%
 #IV. 
 
 ```
+
+___
+
+Here is our tidy data:
 
 ```{r, warning=FALSE, echo=FALSE}
 glimpse(jo2)
@@ -181,4 +199,14 @@ tidy(modJO) %>%
 filter(p.value <= 0.05) %>%
 mutate(term = term %>% str_remove_all("ChemicalID"))
 ```
- We did it!
+___
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+## Success!
+##### We did it!
+
+</div>
