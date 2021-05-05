@@ -1,0 +1,67 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(plotly)
+```
+
+Today we're going to make a reproducible report about volatile oils in dead juniper trees. This is a collaboration  with [YoungLiving Essential Oil, Inc.](https://www.youngliving.com)
+
+First off, we have to load the data set: 
+
+```{r,message=FALSE, warning=FALSE}
+df <- read.csv("./Data/Juniper_Oils.csv")
+```
+
+**BUT... this data needs some cleaning before we can make it useful. ** It is currently in a wide format, where each compound is in it's own column. 
+
+
+```{r, message= FALSE, warning=FALSE}
+names(df)  <- names(df) %>% make_clean_names()
+compounds <- names(df)[11:33]
+long <- df %>%
+  filter(amplicon == "16S") %>% 
+  pivot_longer(compounds, names_to = "compound", values_to= "yield")
+```
+
+Now that it's cleaned up a bit, we can plot the compound yields over time since burn... 
+
+```{r, message= FALSE, warning=FALSE}
+
+p1 <- ggplot(long, aes(x=years_since_burn, y=yield)) +
+  geom_smooth() +
+  geom_point() +
+  facet_wrap(~compound, scales =  "free")
+
+```
+
+
+Here's some summary info about the compounds that were observed: 
+
+
+```{r, message= FALSE, warning=FALSE, echo=FALSE}
+summarized_compound <- long %>% 
+  group_by(compound) %>% 
+  summarize(MeanConcentration = mean(yield))
+
+knitr :: kable(summarized_compound,row.names = FALSE, digits = 4,caption = "Mean concentration values across entire study")
+```
+
+We can also do something to make this plot interactive!
+
+**This uses the "plotly" package** 
+
+```{r, message= FALSE, warning=FALSE}
+ggplotly(p1)
+```
+
+
+
+
+
+
