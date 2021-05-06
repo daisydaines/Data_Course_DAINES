@@ -26,20 +26,16 @@ fs4 <- fs4[!(fs4$Tier=="VIIB"),]
 class(fs4$Tier)
 as.factor(fs4$Tier)
 
-ggplot(fs4, aes(y=Salary,x= Rank)) +
+pl1 <- ggplot(fs4, aes(y=Salary,x= Rank)) +
   geom_boxplot(aes(fill=Rank)) +
   facet_wrap(~Tier) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 55))
 
+pl1
 # really need to use ggsave rather than jpeg() - Zahn
-jpeg("./DAINES_Fig_1.jpg")
-ggplot(fs4, aes(y=Salary,x= Rank)) +
-  geom_boxplot(aes(fill=Rank)) +
-  facet_wrap(~Tier) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 55))
-dev.off()
+ggsave("./DAINES_Fig_1.jpg", plot = pl1)
+
 
 #II. 
 
@@ -74,18 +70,14 @@ jo2 <- jo1 %>%
     values_to = "Concentration") 
 
 #IV. 
-ggplot(jo2, aes(x = YearsSinceBurn, y = Concentration)) + 
+pl2 <- ggplot(jo2, aes(x = YearsSinceBurn, y = Concentration)) + 
   facet_wrap(~ChemicalID, scales = "free") +
   geom_smooth(size=1.1) +
   theme_minimal()
 
+pl2
 # really need to use ggsave rather than jpeg() - Zahn
-jpeg("./DAINES_Fig_2.jpg")
-ggplot(jo2, aes(x = YearsSinceBurn, y = Concentration)) + 
-  facet_wrap(~ChemicalID, scales = "free") +
-  geom_smooth(size=1.1) +
-  theme_minimal()
-dev.off()
+ggsave("./DAINES_Fig_2.jpg", plot = pl2)
 
 #V. didn't parse model output with broom package - Zahn
 modJO <- glm(data = jo2, Concentration ~ ChemicalID * YearsSinceBurn)
